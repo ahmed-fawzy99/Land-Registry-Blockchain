@@ -1,0 +1,23 @@
+TESTING CODE IN TERMINAL:
+
+truffle build --reset
+truffle migrate --reset
+truffle console
+
+let instance = await Main.deployed()
+let accounts = await web3.eth.getAccounts()
+instance.addLandToSystem("LAND1", "1", 1, "LANDMARK1", {from: accounts[1], value: 1000000000000000000})
+instance.addLandToSystem("LAND2", "2", 2, "LANDMARK2", {from: accounts[1], value: 1000000000000000000})
+instance.createOwner("I AM OWNER 1", "291030236468200", {from: accounts[1], value: 1000000000000000000})
+instance.createOwner("I AM OWNER 2", "296321302363210", {from: accounts[2], value: 1000000000000000000})
+
+instance.showLandById(1)
+instance.showOwnerById(1)
+
+instance.registerLand(1, 1, {from: accounts[1], value: 10000000000000000000})
+
+instance.transferLand(1, 1, 2, {from: accounts[3], value: 10000000000000000000})
+
+instance.showLandById(1)
+instance.showOwnerById(1)
+instance.showOwnerById(2)
