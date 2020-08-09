@@ -1,1 +1,1 @@
-# land_registry_contract_ver_1
+# land_registry_contract
