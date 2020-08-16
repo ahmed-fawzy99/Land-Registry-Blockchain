@@ -26,8 +26,8 @@ contract Main {
     }
 
     // COUNTERS OF THE NUMBER OF LANDS AND OWNERS EXISTING IN THE SYSTEM (MAX: 16)
-    uint landCounter = 0;
-    uint ownerCounter = 0;
+    uint public landCounter = 0;
+    uint public ownerCounter = 0;
 
     // COSTS OF WRITING TO THE BLOCKCHAIN
     uint addLandFee = 1 ether;
@@ -47,26 +47,25 @@ contract Main {
     Owner[ARR_SIZE] public owners;
     uint8[ARR_SIZE] public landsOwnedIds;
 
-
     function createOwner(string calldata _fullName, string calldata _NID) external payable {
 
-        // VEREFICATIONS FOR THE SIZE AND PAYMENT AMOUNT 
+        // VEREFICATIONS FOR THE SIZE AND PAYMENT AMOUNT
         require(ownerCounter < 16);
-        require(msg.value == addOwnerFee);
+//        require(msg.value == addOwnerFee);
 
         // ADDING THE NEW OWNER TO THE BLOCKCHAIN
         owners[ownerCounter] = Owner(_fullName, _NID, 0, landsOwnedIds, msg.sender, ownerCounter+1);
         ownerCounter++;
-        
+
         // EVENT EMITTER FOR THE FRONT END
         emit NewOwner(_fullName, _NID);
     }
 
     function addLandToSystem(string calldata _landName, string calldata _coordination, uint _area, string calldata _landmark) external payable {
 
-        // VEREFICATIONS FOR THE SIZE AND PAYMENT AMOUNT 
+        // VEREFICATIONS FOR THE SIZE AND PAYMENT AMOUNT
         require(landCounter < 16);
-        require(msg.value == addLandFee);
+//        require(msg.value == addLandFee);
 
         // ADDING THE NEW LAND TO THE BLOCKCHAIN
         lands[landCounter] = Land(_landName, _coordination, _area, _landmark, landCounter + 1, address(0));
@@ -75,14 +74,15 @@ contract Main {
         // EVENT EMITTER FOR THE FRONT END
         emit NewLand(_landName, _coordination, _area, _landmark);
     }
-    
-    function showLandById(uint _landId) public view returns(Land memory){ 
+
+    function showLandById(uint _landId) public view returns(Land memory){
         return lands[_landId-1];
     }
+
     function showOwnerById(uint _ownerId) public view returns(Owner memory){
         return owners[_ownerId-1];
     }
-    
+
     function showOwnerLands(uint _ownerId) public view returns(uint8[ARR_SIZE] memory){
         uint8[ARR_SIZE] memory landIds = owners[_ownerId-1].ownedLandsIDs;
         return landIds;
@@ -92,9 +92,9 @@ contract Main {
     function registerLand(uint _landId, uint _ownerId) external payable {
 
         //CHECK IF THE LAND DOES NOT BELONG TO SOMEONE ELSE && CHECK IF THE OWNER ID AND THE LAND ID BOTH EXIST IN THE SYSTEM
-        if ( (lands[_landId].ownerAddress == address(0)) && (_landId <= landCounter) && (_ownerId <= ownerCounter) ){ 
-            
-            require(msg.value == registryFee);
+        if ( (lands[_landId].ownerAddress == address(0)) && (_landId <= landCounter) && (_ownerId <= ownerCounter) ){
+
+//            require(msg.value == registryFee);
             uint counter = owners[_ownerId-1].numberOfLandsOwned;
             lands[_landId-1].ownerAddress =  owners[_ownerId-1].ownerAddress;
             owners[_ownerId-1].ownedLandsIDs[counter] = uint8(_landId);
@@ -110,8 +110,8 @@ contract Main {
 
         // CHECK IF THE ORIGINAL OWNER DOES INDEED HAVE THE LAND REGISTERED TO HIS/HER ADDRESS
         if (lands[_landId-1].ownerAddress == owners[_originalOwnerId-1].ownerAddress) {
-            require(msg.value == registryFee);
-            
+//            require(msg.value == registryFee);
+
             // REMOVE ORIGINAL OWNER ASSOCIATION WITH THE LAND
             for (uint i = 0; i < ARR_SIZE; i++){
                 if(owners[_originalOwnerId-1].ownedLandsIDs[i] == _landId){

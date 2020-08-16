@@ -1,14 +1,157 @@
-<html>
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <!-- CSRF Token -->
+  <meta name="csrf-token" content="{{ csrf_token() }}">
+
+  <title>Land registry</title>
+
+  <!-- Fonts -->
+  <link rel="dns-prefetch" href="//fonts.gstatic.com">
+  <link href="https://fonts.googleapis.com/css?family=Nunito" rel="stylesheet">
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN" crossorigin="anonymous">
+  <!-- Styles -->
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdn.datatables.net/1.10.21/css/dataTables.bootstrap4.min.css">
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js" integrity="sha512-bLT0Qm9VnAYZDflyKcBaQ2gg0hSYNQrJ8RilYldYQ1FxQYoCLtUjuuRuZo+fjqhx/qtq/1itJ0C2ejDxltZVFg==" crossorigin="anonymous"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js" integrity="sha384-B4gt1jrGC7Jh4AgTPSdUtOBvfO8shuf57BaghqFfPlYxofvL8/KUEfYiJOMMV+rV" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+  <script src="https://cdn.datatables.net/1.10.21/js/jquery.dataTables.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/vue-loading-overlay@3"></script>
+  <link href="https://cdn.jsdelivr.net/npm/vue-loading-overlay@3/dist/vue-loading.css" rel="stylesheet">
+  <!-- Init the plugin and component-->
+  <script>
+    Vue.use(VueLoading);
+    Vue.component('loading', VueLoading)
+  </script>
+
+</head>
 <body>
+<div id="app">
+  <nav class="navbar navbar-expand-md navbar-light bg-white shadow-sm ">
+    <div class="container justify-content-between">
+      <a class="navbar-brand" href="/">
+        Home
+      </a>
+<!--      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">-->
+<!--        <span class="navbar-toggler-icon"></span>-->
+<!--      </button>-->
 
-<h1>Land Registry</h1>
-<label for="coorinations">land coords:</label>
-  <input type="text" id="coorinations" name="coorinations"><br><br>
-<button type="button"
-onclick="document.getElementById('demo').innerHTML = Date()">
-search.</button>
+<!--        <ul class="navbar-nav">-->
+<!--          <li class="nav-item">-->
+<!--            <a class="nav-link" href="#">Owners</a>-->
+<!--          </li>-->
+<!--          <li class="nav-item">-->
+<!--            <a class="nav-link" href="#">Lands</a>-->
+<!--          </li>-->
+<!--        </ul>-->
+      </div>
+  </nav>
 
-<p id="demo"></p>
-
+  <main class="py-4">
+    <div class="container" id="content">
+      <div class="row justify-content-center">
+        <div class="col-md-12">
+          <div class="card">
+            <div class="card-header">
+              Lands
+              <button @click="addLand('Land1', '30.049963, 31.262597', 20, 'landmark1')" type="button" class="btn btn-sm btn-primary float-right">Add Land</button>
+            </div>
+            <div class="card-body">
+              <loading :active.sync="isLoadingLands"
+                       :can-cancel="false"
+                       :is-full-page="false"></loading>
+              <table id="landsTable" class="table table-responsive w-100 d-block d-md-table">
+                <thead class="thead-dark">
+                <tr>
+                  <th scope="col">#</th>
+                  <th scope="col">Land Name</th>
+                  <th scope="col">Coordination</th>
+                  <th scope="col">Area</th>
+                  <th scope="col">Land Mark</th>
+                  <th scope="col">Owner Address</th>
+                  <th scope="col">Actions</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr v-for="land in lands">
+                  <td scope="row">{{land.id}}</td>
+                  <td>{{land.landName}}</td>
+                  <td>{{land.coordination}}</td>
+                  <td>{{land.area}}</td>
+                  <td>{{land.landmark}}</td>
+                  <td>{{land.ownerAddress}}</td>
+                  <td><button type="button" class="btn btn-sm btn-outline-primary"><i class="fa fa-pencil"></i></button></td>
+                </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="row justify-content-center" style="margin-top: 20px">
+        <div class="col-md-12">
+          <div class="card">
+            <div class="card-header">
+              Owners
+              <button @click="addOwner('Owner1', '1')" type="button" class="btn btn-sm btn-primary float-right">Add Owner</button>
+            </div>
+            <div class="card-body">
+              <loading :active.sync="isLoadingOwners"
+                       :can-cancel="false"
+                       :is-full-page="false"></loading>
+              <table id="ownersTable" class="table table-responsive w-100 d-block d-md-table">
+                <thead class="thead-dark">
+                <tr>
+                  <th scope="col">#</th>
+                  <th scope="col">Full Name</th>
+                  <th scope="col">National ID</th>
+                  <th scope="col">Number of Lands</th>
+                  <th scope="col">Owned Lands IDs</th>
+                  <th scope="col">Address</th>
+                  <th scope="col">Actions</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr v-for="owner in owners">
+                  <td scope="row">{{owner.id}}</td>
+                  <td>{{owner.fullName}}</td>
+                  <td>{{owner.nationalId}}</td>
+                  <td>{{owner.numberOfLandsOwned}}</td>
+                  <td>{{owner.ownedLandsIDs}}</td>
+                  <td>{{owner.ownerAddress}}</td>
+                  <td><button type="button" class="btn btn-sm btn-outline-primary"><i class="fa fa-pencil"></i></button></td>
+                </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+<script src="js/truffle-contract.js"></script>
+<script type="module" src="js/app.js"></script>
+<script>
+  // $(document).ready(function() {
+  //   $('#ownersTable').DataTable({
+  //     "language": {
+  //       "emptyTable": "",
+  //       "zeroRecords": ""
+  //     }
+  //   });
+  //   $('#landsTable').DataTable({
+  //     "language": {
+  //       "emptyTable": "",
+  //       "zeroRecords": ""
+  //     }
+  //   });
+  // } );
+</script>
 </body>
-</html> 
+</html>
