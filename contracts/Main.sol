@@ -17,12 +17,12 @@ contract Main {
     }
 
     struct Owner {
+    uint id;
     string fullName;
     string nationalId;
     uint numberOfLandsOwned;
-    uint8[ARR_SIZE] ownedLandsIDs; // ARRAY OF IDs
     address ownerAddress;
-    uint id;
+    uint8[ARR_SIZE] ownedLandsIDs; // ARRAY OF IDs
     }
 
     // COUNTERS OF THE NUMBER OF LANDS AND OWNERS EXISTING IN THE SYSTEM (MAX: 16)
@@ -54,7 +54,7 @@ contract Main {
 //        require(msg.value == addOwnerFee);
 
         // ADDING THE NEW OWNER TO THE BLOCKCHAIN
-        owners[ownerCounter] = Owner(_fullName, _NID, 0, landsOwnedIds, msg.sender, ownerCounter+1);
+        owners[ownerCounter] = Owner(ownerCounter+1, _fullName, _NID, 0, msg.sender, landsOwnedIds);
         ownerCounter++;
 
         // EVENT EMITTER FOR THE FRONT END

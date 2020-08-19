@@ -59,12 +59,13 @@
           <div class="card">
             <div class="card-header">
               Lands
-              <button @click="addLand('Land1', '30.049963, 31.262597', 20, 'landmark1')" type="button" class="btn btn-sm btn-primary float-right">Add Land</button>
+              <button type="button" class="btn btn-sm btn-primary float-right" data-toggle="modal" data-target="#addLandModal">Add Land</button>
             </div>
             <div class="card-body">
               <loading :active.sync="isLoadingLands"
                        :can-cancel="false"
                        :is-full-page="false"></loading>
+              <input type="text" v-model="search" class="form-control" style="margin-bottom: 20px" placeholder="search">
               <table id="landsTable" class="table table-responsive w-100 d-block d-md-table">
                 <thead class="thead-dark">
                 <tr>
@@ -78,14 +79,14 @@
                 </tr>
                 </thead>
                 <tbody>
-                <tr v-for="land in lands">
+                <tr v-for="land in searchedLands">
                   <td scope="row">{{land.id}}</td>
                   <td>{{land.landName}}</td>
                   <td>{{land.coordination}}</td>
                   <td>{{land.area}}</td>
                   <td>{{land.landmark}}</td>
-                  <td>{{land.ownerAddress}}</td>
-                  <td><button type="button" class="btn btn-sm btn-outline-primary"><i class="fa fa-pencil"></i></button></td>
+                  <td>{{parseInt(land.ownerAddress) == 0 ? 'None' : land.ownerAddress}}</td>
+                  <td><button @click="selectedLand = land" data-toggle="modal" data-target="#LandOwnerModal" type="button" class="btn btn-sm btn-outline-primary"><i class="fa fa-pencil"></i></button></td>
                 </tr>
                 </tbody>
               </table>
@@ -98,7 +99,7 @@
           <div class="card">
             <div class="card-header">
               Owners
-              <button @click="addOwner('Owner1', '1')" type="button" class="btn btn-sm btn-primary float-right">Add Owner</button>
+              <button type="button" class="btn btn-sm btn-primary float-right" data-toggle="modal" data-target="#addOwnerModal">Add Owner</button>
             </div>
             <div class="card-body">
               <loading :active.sync="isLoadingOwners"
@@ -111,9 +112,9 @@
                   <th scope="col">Full Name</th>
                   <th scope="col">National ID</th>
                   <th scope="col">Number of Lands</th>
-                  <th scope="col">Owned Lands IDs</th>
+<!--                  <th scope="col">Owned Lands IDs</th>-->
                   <th scope="col">Address</th>
-                  <th scope="col">Actions</th>
+<!--                  <th scope="col">Actions</th>-->
                 </tr>
                 </thead>
                 <tbody>
@@ -122,9 +123,9 @@
                   <td>{{owner.fullName}}</td>
                   <td>{{owner.nationalId}}</td>
                   <td>{{owner.numberOfLandsOwned}}</td>
-                  <td>{{owner.ownedLandsIDs}}</td>
+<!--                  <td>{{owner.ownedLandsIDs}}</td>-->
                   <td>{{owner.ownerAddress}}</td>
-                  <td><button type="button" class="btn btn-sm btn-outline-primary"><i class="fa fa-pencil"></i></button></td>
+<!--                  <td><button type="button" class="btn btn-sm btn-outline-primary"><i class="fa fa-pencil"></i></button></td>-->
                 </tr>
                 </tbody>
               </table>
@@ -134,7 +135,92 @@
       </div>
     </div>
   </main>
+  <div class="modal fade" id="addLandModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Add Land</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+            <div class="form-group">
+              <label>Name</label>
+              <input v-model="name" type="text" class="form-control" placeholder="Enter name">
+            </div>
+            <div class="form-group">
+              <label>coordination</label>
+              <input v-model="coordination" type="text" class="form-control" placeholder="Enter coordination">
+            </div>
+            <div class="form-group">
+              <label>area</label>
+              <input v-model="area" type="number" class="form-control" placeholder="Enter area">
+            </div>
+            <div class="form-group">
+              <label>landmark</label>
+              <input v-model="landmark" type="text" class="form-control" placeholder="Enter landmark">
+            </div>
+        </div>
+        <div class="modal-footer">
+          <button ref="closeAddLand" type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+          <button @click="addLandFromForm" type="button" class="btn btn-primary">Add</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="modal fade" id="addOwnerModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Add Owner</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+            <div class="form-group">
+              <label>Name</label>
+              <input v-model="ownerName" type="text" class="form-control" placeholder="Enter name">
+            </div>
+            <div class="form-group">
+              <label>nid</label>
+              <input v-model="nid" type="text" class="form-control" placeholder="Enter nid">
+            </div>
+        </div>
+        <div class="modal-footer">
+          <button ref="closeAddOwner" type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+          <button @click="addOwnerFromForm" type="button" class="btn btn-primary">Add</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="modal fade" id="LandOwnerModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Add Owner</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+            <div class="form-group">
+              <label>Owner</label>
+              <select class="form-control" name="Owner" v-model="selectedOwner" id="">
+                <option v-for="owner in owners" :value="owner.id">{{owner.fullName}}</option>
+              </select>
+            </div>
+        </div>
+        <div class="modal-footer">
+          <button ref="closeLandOwner" type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+          <button @click="addLandOwner" type="button" class="btn btn-primary">Add</button>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
+
 <script src="js/truffle-contract.js"></script>
 <script type="module" src="js/app.js"></script>
 <script>

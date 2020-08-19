@@ -1,5 +1,5 @@
 var app = new Vue({
-  el: '#content',
+  el: '#app',
   data: {
     loading: true,
     contracts: {},
@@ -9,6 +9,15 @@ var app = new Vue({
     owners: [],
     isLoadingLands: true,
     isLoadingOwners: true,
+    name: "",
+    coordination: "",
+    area: "",
+    landmark: "",
+    ownerName: "",
+    nid: "",
+    search: "",
+    selectedLand: {},
+    selectedOwner: 0
   },
   async mounted(){
     await this.loadWeb3()
@@ -94,13 +103,15 @@ var app = new Vue({
         const owner = await this.landRegistry.owners(i)
         console.log(owner)
         let newOwner= {
-          fullName: owner[0],
-          nationalId: owner[1],
-          numberOfLandsOwned: owner[2],
-          ownedLandsIDs: owner[3],
+          id: owner[0],
+          fullName: owner[1],
+          nationalId: owner[2],
+          numberOfLandsOwned: owner[3],
           ownerAddress: owner[4],
-          id: owner[5],
+          ownedLandsIDs: owner[5],
         }
+        let ownerLands= await this.landRegistry.showOwnerLands(owner[0])
+        console.log(ownerLands)
         this.owners.push(newOwner)
       }
       this.isLoadingOwners= false
@@ -131,24 +142,96 @@ var app = new Vue({
       }
       this.isLoadingLands= false
     },
+    async addLandFromForm(name, coordination, area, landmark){
+      this.$refs.closeAddLand.click()
+      await this.addLand(this.name, this.coordination, this.area, this.landmark)
+      this.name= ""
+      this.coordination= ""
+      this.area= ""
+      this.landmark= ""
+    },
     async addLand(name, coordination, area, landmark){
       this.isLoadingLands= true
       try{
         await this.landRegistry.addLandToSystem(name, coordination, area, landmark)
       }catch (e) {
+        console.log(e)
       }
       await this.loadLands()
       this.isLoadingLands= false
+    },
+    async addOwnerFromForm(name, nid){
+      this.$refs.closeAddOwner.click()
+      await this.addOwner(this.ownerName, this.nid)
     },
     async addOwner(name, nid){
       this.isLoadingOwners= true
       try{
         await this.landRegistry.createOwner(name, nid)
       }catch (e) {
+        console.log(e)
       }
       await this.loadOwners()
       this.isLoadingOwners= false
+    },
+    async addLandOwner(){
+      console.log(this.selectedOwner)
+      if(!this.selectedOwner){
+        return;
+      }
+      this.$refs.closeLandOwner.click()
+      if(parseInt(this.selectedLand.ownerAddress) == 0){
+        await this.linkLandWithOwner(this.selectedLand.id, this.selectedOwner)
+      }else{
+        let originalOwner= this.owners.filter(owner => {
+          return owner.ownerAddress == this.selectedLand.ownerAddress
+        })
+        console.log("original Owner: ", originalOwner)
+        await this.transferLandToOwner(this.selectedLand.id, originalOwner[0].id, this.selectedOwner)
+      }
+      this.selectedOwner= ""
+    },
+    async linkLandWithOwner(land, owner){
+      this.isLoadingLands= true
+      this.isLoadingOwners= true
+      try{
+        await this.landRegistry.registerLand(land, owner)
+      }catch (e) {
+        console.log(e)
+      }
+      await this.loadLands()
+      await this.loadOwners()
+      this.isLoadingLands= false
+      this.isLoadingOwners= false
+    },
+    async transferLandToOwner(land, originalOwner, owner){
+      this.isLoadingLands= true
+      this.isLoadingOwners= true
+      try{
+        await this.landRegistry.transferLand(land, originalOwner, owner)
+      }catch (e) {
+        console.log(e)
+      }
+      await this.loadLands()
+      await this.loadOwners()
+      this.isLoadingLands= false
+      this.isLoadingOwners= false
     }
 
+
+  },
+  computed: {
+    searchedLands(){
+      console.log("filtering")
+      if(this.search == ""){
+        return this.lands
+      } else{
+        let lands= this.lands.filter(land => {
+          return land.landName.toLocaleLowerCase().indexOf(this.search.toLocaleLowerCase()) != -1 || this.search == land.id
+        })
+        console.log(lands)
+        return lands
+      }
+    }
   }
 })
